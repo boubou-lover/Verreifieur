@@ -8,6 +8,20 @@ const DEFAULT_CONFIG = {
 // Variable globale pour stocker le solde dû
 let soldeDu = 0;
 
+// Retirer le zéro au focus
+function clearZero(input) {
+  if (input.value === '0' || input.value === '0.00') {
+    input.value = '';
+  }
+}
+
+// Remettre le zéro si vide au blur
+function resetToZero(input) {
+  if (input.value === '' || input.value === null) {
+    input.value = '0';
+  }
+}
+
 // Initialisation au chargement
 document.addEventListener('DOMContentLoaded', () => {
   // Charger les prix depuis localStorage ou utiliser les valeurs par défaut
