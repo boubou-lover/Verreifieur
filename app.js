@@ -149,6 +149,12 @@ function calculerRenduMonnaie() {
   }
 }
 
+// Définir un montant rapide
+function setMontant(montant) {
+  document.getElementById('montantDonne').value = montant;
+  calculerRenduMonnaie();
+}
+
 // Nouveau client (reset uniquement les quantités)
 function nouveauClient() {
   document.getElementById('nombreGobeletsRendus').value = '0';

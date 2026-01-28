@@ -57,6 +57,12 @@
       <label>Client donne :</label>
       <input type="number" id="montantDonne" value="0" min="0" step="0.01" oninput="calculerRenduMonnaie()">
     </div>
+    <div class="quick-buttons">
+      <button class="btn-quick" onclick="setMontant(5)">5€</button>
+      <button class="btn-quick" onclick="setMontant(10)">10€</button>
+      <button class="btn-quick" onclick="setMontant(20)">20€</button>
+      <button class="btn-quick" onclick="setMontant(50)">50€</button>
+    </div>
     <p id="renduMonnaie"></p>
   </div>
 

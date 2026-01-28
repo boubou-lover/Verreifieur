@@ -246,6 +246,38 @@ button:active {
   font-size: 18px;
 }
 
+/* BOUTONS RAPIDES */
+.quick-buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin: 15px 0;
+}
+
+.btn-quick {
+  padding: 12px 8px;
+  background: linear-gradient(135deg, #ffa500 0%, #ff8c00 100%);
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 3px 8px rgba(255, 165, 0, 0.3);
+}
+
+.btn-quick:hover {
+  background: linear-gradient(135deg, #ff8c00 0%, #ff7700 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 12px rgba(255, 165, 0, 0.5);
+}
+
+.btn-quick:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 5px rgba(255, 165, 0, 0.3);
+}
+
 #renduMonnaie {
   text-align: center;
   font-size: 20px;
@@ -299,6 +331,11 @@ footer {
   button {
     font-size: 14px;
     padding: 12px 16px;
+  }
+
+  .btn-quick {
+    font-size: 14px;
+    padding: 10px 6px;
   }
 
   input[type="number"] {
