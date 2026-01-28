@@ -1,9 +1,8 @@
-const CACHE_NAME = "cache-verreifieur-v0.77";
+const CACHE_NAME = "cache-verreifieur-v0.8";
 const URLS_TO_CACHE = [
   "/",
   "/index.html",
-  "/logo192.png",
-  "https://menubois.pq.lu/LOGO-FOND-NOIR.jpg",
+  "/icon-192x192.png",
   // ajoute ici si tu as d'autres ressources statiques à cacher
 ];
 
