@@ -30,12 +30,31 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialiser l'affichage des prix
   majAffichagePrix();
   
+  // Afficher la version depuis le service worker
+  displayVersion();
+  
   // Enregistrer le service worker pour PWA
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/service-worker.js')
       .catch(err => console.log('SW registration failed:', err));
   }
 });
+
+// Afficher la version de l'application
+async function displayVersion() {
+  try {
+    const response = await fetch('/service-worker.js');
+    const text = await response.text();
+    const match = text.match(/CACHE_NAME\s*=\s*["']verrifieur-v([\d.]+)["']/);
+    if (match && match[1]) {
+      document.getElementById('app-version').textContent = match[1];
+    } else {
+      document.getElementById('app-version').textContent = '1.0.1';
+    }
+  } catch (error) {
+    document.getElementById('app-version').textContent = '1.0.1';
+  }
+}
 
 // Charger la configuration
 function loadConfig() {
