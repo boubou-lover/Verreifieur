@@ -40,7 +40,7 @@ body {
   width: 100%;
   max-width: 420px;
   position: relative;
-  box-shadow: 
+  box-shadow:
     0 10px 40px rgba(0, 0, 0, 0.5),
     0 0 0 1px rgba(255, 165, 0, 0.1);
   animation: fadeIn 0.5s ease;
@@ -57,7 +57,7 @@ body {
   border-radius: 50px;
   font-size: 14px;
   font-weight: bold;
-  box-shadow: 
+  box-shadow:
     0 4px 12px rgba(255, 165, 0, 0.4),
     0 0 20px rgba(255, 165, 0, 0.2);
   animation: pulse 2s ease-in-out infinite;
@@ -129,14 +129,23 @@ body {
   opacity: 0.8;
 }
 
-/* Produit supplémentaire mis en avant */
-#produitSupplementaireGroup {
-  border: 1px dashed rgba(255, 165, 0, 0.35);
-  background: rgba(255, 165, 0, 0.05);
+/* Tag caution affiché sur les produits supplémentaires */
+.caution-tag {
+  font-size: 11px;
+  color: #ffcc66;
+  font-weight: 500;
+  font-style: italic;
 }
 
-#produitSupplementaireGroup:hover {
-  background: rgba(255, 165, 0, 0.09);
+/* Produit supplémentaire */
+.produit-extra {
+  border: 1px dashed rgba(255, 165, 0, 0.35);
+  background: rgba(255, 165, 0, 0.05) !important;
+  animation: slideIn 0.3s ease;
+}
+
+.produit-extra:hover {
+  background: rgba(255, 165, 0, 0.09) !important;
 }
 
 /* INPUTS number */
@@ -166,7 +175,7 @@ input[type="number"]::-webkit-outer-spin-button {
   height: 40px;
 }
 
-/* INPUT text (nom produit) */
+/* INPUT text */
 input[type="text"] {
   width: 150px;
   padding: 10px 12px;
@@ -190,11 +199,104 @@ input[type="text"]:focus {
   box-shadow: 0 0 0 3px rgba(255, 165, 0, 0.1);
 }
 
+/* FORM GROUP checkbox (alignement) */
+.form-group-checkbox {
+  align-items: center;
+}
+
+.form-group-checkbox label:first-child {
+  flex: 1;
+  font-size: 14px;
+  color: #ccc;
+  margin-right: 10px;
+  flex-direction: row;
+  align-items: center;
+}
+
+/* TOGGLE SWITCH */
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 52px;
+  height: 28px;
+  flex-shrink: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.toggle-slider {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: #444;
+  border-radius: 28px;
+  transition: 0.3s;
+  cursor: pointer;
+}
+
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  height: 20px;
+  width: 20px;
+  left: 4px;
+  bottom: 4px;
+  background: #888;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+.toggle input:checked + .toggle-slider {
+  background: rgba(255, 165, 0, 0.25);
+  border: 1px solid #ffa500;
+}
+
+.toggle input:checked + .toggle-slider::before {
+  transform: translateX(24px);
+  background: #ffa500;
+  box-shadow: 0 0 8px rgba(255, 165, 0, 0.6);
+}
+
+/* BLOC CONFIG PRODUIT */
+.produit-config-block {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.produit-config-block .form-group {
+  margin: 8px 0;
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.produit-config-block .form-group:last-child {
+  margin-bottom: 0;
+}
+
+.produit-config-header {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffa500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  padding-left: 2px;
+}
+
 /* SÉPARATEUR paramètres */
 .settings-separator {
   display: flex;
   align-items: center;
-  margin: 20px 0 10px;
+  margin: 20px 0 14px;
   gap: 10px;
   color: #ffa500;
   font-size: 13px;
@@ -349,7 +451,6 @@ button:active {
 
 .btn-quick:active {
   transform: translateY(0);
-  box-shadow: 0 2px 5px rgba(255, 165, 0, 0.3);
 }
 
 #renduMonnaie {

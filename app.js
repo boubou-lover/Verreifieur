@@ -3,8 +3,11 @@ const DEFAULT_CONFIG = {
   caution: 2.00,
   prix2: 2.00,
   prix4: 4.00,
-  nomProduit: '',
-  prixProduit: 0.00
+  produits: [
+    { nom: '', prix: 0.00, caution: false },
+    { nom: '', prix: 0.00, caution: false },
+    { nom: '', prix: 0.00, caution: false }
+  ]
 };
 
 // Variable globale pour stocker le solde dû
@@ -28,7 +31,7 @@ function resetToZero(input) {
 document.addEventListener('DOMContentLoaded', () => {
   loadConfig();
   majAffichagePrix();
-  majProduitSupplementaire();
+  majProduitsSupplementaires();
   displayVersion();
 
   if ('serviceWorker' in navigator) {
@@ -38,7 +41,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('prix2').addEventListener('input', majAffichagePrix);
   document.getElementById('prix4').addEventListener('input', majAffichagePrix);
-  document.getElementById('caution').addEventListener('input', majAffichagePrix);
+  document.getElementById('caution').addEventListener('input', () => {
+    majAffichagePrix();
+    majProduitsSupplementaires(); // rafraîchit les tags caution
+  });
 });
 
 // Afficher la version
@@ -61,25 +67,42 @@ function loadConfig() {
     document.getElementById('prix2').value = config.prix2 ?? DEFAULT_CONFIG.prix2;
     document.getElementById('prix4').value = config.prix4 ?? DEFAULT_CONFIG.prix4;
     document.getElementById('caution').value = config.caution ?? DEFAULT_CONFIG.caution;
-    document.getElementById('nomProduit').value = config.nomProduit ?? '';
-    document.getElementById('prixProduit').value = config.prixProduit ?? '0.00';
+
+    const produits = config.produits ?? DEFAULT_CONFIG.produits;
+    for (let i = 0; i < 3; i++) {
+      const p = produits[i] ?? { nom: '', prix: 0.00, caution: false };
+      document.getElementById(`nomProduit${i}`).value = p.nom ?? '';
+      document.getElementById(`prixProduitConfig${i}`).value = p.prix ?? '0.00';
+      document.getElementById(`cautionProduit${i}`).checked = p.caution ?? false;
+    }
   } else {
     document.getElementById('prix2').value = DEFAULT_CONFIG.prix2;
     document.getElementById('prix4').value = DEFAULT_CONFIG.prix4;
     document.getElementById('caution').value = DEFAULT_CONFIG.caution;
-    document.getElementById('nomProduit').value = '';
-    document.getElementById('prixProduit').value = '0.00';
+    for (let i = 0; i < 3; i++) {
+      document.getElementById(`nomProduit${i}`).value = '';
+      document.getElementById(`prixProduitConfig${i}`).value = '0.00';
+      document.getElementById(`cautionProduit${i}`).checked = false;
+    }
   }
 }
 
 // Sauvegarder la configuration
 function saveConfig() {
+  const produits = [];
+  for (let i = 0; i < 3; i++) {
+    produits.push({
+      nom: document.getElementById(`nomProduit${i}`).value.trim(),
+      prix: parseFloat(document.getElementById(`prixProduitConfig${i}`).value) || 0,
+      caution: document.getElementById(`cautionProduit${i}`).checked
+    });
+  }
+
   const config = {
     prix2: parseFloat(document.getElementById('prix2').value),
     prix4: parseFloat(document.getElementById('prix4').value),
     caution: parseFloat(document.getElementById('caution').value),
-    nomProduit: document.getElementById('nomProduit').value.trim(),
-    prixProduit: parseFloat(document.getElementById('prixProduit').value) || 0
+    produits
   };
   localStorage.setItem('verrifieur-config', JSON.stringify(config));
 }
@@ -97,19 +120,34 @@ function majAffichagePrix() {
   saveConfig();
 }
 
-// Mettre à jour le produit supplémentaire
-function majProduitSupplementaire() {
-  const nom = document.getElementById('nomProduit').value.trim();
-  const prix = parseFloat(document.getElementById('prixProduit').value) || 0;
-  const group = document.getElementById('produitSupplementaireGroup');
+// Mettre à jour les produits supplémentaires
+function majProduitsSupplementaires() {
+  const cautionGlobale = parseFloat(document.getElementById('caution').value) || 0;
 
-  if (nom !== '') {
-    document.getElementById('nomProduitLabel').textContent = nom;
-    document.getElementById('prixProduitLabel').textContent = prix.toFixed(2);
-    group.style.display = 'flex';
-  } else {
-    group.style.display = 'none';
-    document.getElementById('nombreProduitSupp').value = '0';
+  for (let i = 0; i < 3; i++) {
+    const nom = document.getElementById(`nomProduit${i}`).value.trim();
+    const prix = parseFloat(document.getElementById(`prixProduitConfig${i}`).value) || 0;
+    const avecCaution = document.getElementById(`cautionProduit${i}`).checked;
+    const group = document.getElementById(`produitGroup${i}`);
+
+    if (nom !== '') {
+      document.getElementById(`nomProduit${i}Label`).textContent = nom;
+      document.getElementById(`prixProduit${i}Label`).textContent = prix.toFixed(2);
+
+      const tagEl = document.getElementById(`cautionProduit${i}Tag`);
+      if (avecCaution) {
+        tagEl.textContent = `+ ${cautionGlobale.toFixed(2)} € caution`;
+        tagEl.style.display = 'inline';
+      } else {
+        tagEl.textContent = '';
+        tagEl.style.display = 'none';
+      }
+
+      group.style.display = 'flex';
+    } else {
+      group.style.display = 'none';
+      document.getElementById(`nombreProduit${i}`).value = '0';
+    }
   }
 
   saveConfig();
@@ -132,30 +170,44 @@ function vibrate(pattern) {
 // Calculer le solde
 function calculerSolde() {
   const nbGobeletsRendus = parseInt(document.getElementById('nombreGobeletsRendus').value) || 0;
-  const nbBoissons2E = parseInt(document.getElementById('nombreBoissons2E').value) || 0;
-  const nbBoissons4E = parseInt(document.getElementById('nombreBoissons4E').value) || 0;
-  const nbEauPlate = parseInt(document.getElementById('nombreEauPlate').value) || 0;
-  const nbProduitSupp = parseInt(document.getElementById('nombreProduitSupp').value) || 0;
+  const nbBoissons2E    = parseInt(document.getElementById('nombreBoissons2E').value) || 0;
+  const nbBoissons4E    = parseInt(document.getElementById('nombreBoissons4E').value) || 0;
+  const nbEauPlate      = parseInt(document.getElementById('nombreEauPlate').value) || 0;
 
-  const prix2 = parseFloat(document.getElementById('prix2').value) || 0;
-  const prix4 = parseFloat(document.getElementById('prix4').value) || 0;
+  const prix2   = parseFloat(document.getElementById('prix2').value) || 0;
+  const prix4   = parseFloat(document.getElementById('prix4').value) || 0;
   const caution = parseFloat(document.getElementById('caution').value) || 0;
-  const prixProduit = parseFloat(document.getElementById('prixProduit').value) || 0;
 
-  // Calcul total boissons + produit supp
+  // Boissons principales
   const totalBoissons = (nbBoissons2E * prix2) + (nbBoissons4E * prix4);
-  const totalProduitSupp = nbProduitSupp * prixProduit;
 
-  // Total caution due (boissons + eau plate, pas le produit supp)
-  const totalCautionDue = caution * (nbBoissons2E + nbBoissons4E + nbEauPlate);
+  // Caution boissons principales + eau plate (toujours avec caution)
+  const nbAvecCautionPrincipaux = nbBoissons2E + nbBoissons4E + nbEauPlate;
+  let totalCautionDue = caution * nbAvecCautionPrincipaux;
 
-  // Remboursement caution
+  // Produits supplémentaires
+  let totalProduitsSupp = 0;
+  for (let i = 0; i < 3; i++) {
+    const nom = document.getElementById(`nomProduit${i}`).value.trim();
+    if (nom === '') continue;
+
+    const nb          = parseInt(document.getElementById(`nombreProduit${i}`).value) || 0;
+    const prix        = parseFloat(document.getElementById(`prixProduitConfig${i}`).value) || 0;
+    const avecCaution = document.getElementById(`cautionProduit${i}`).checked;
+
+    totalProduitsSupp += nb * prix;
+    if (avecCaution) {
+      totalCautionDue += nb * caution;
+    }
+  }
+
+  // Remboursement caution gobelets rendus
   const cautionRendue = caution * nbGobeletsRendus;
 
   // Solde final
-  const solde = totalBoissons + totalProduitSupp + totalCautionDue - cautionRendue;
-
+  const solde = totalBoissons + totalProduitsSupp + totalCautionDue - cautionRendue;
   soldeDu = solde;
+
   vibrate(50);
 
   const resultat = document.getElementById('resultat');
@@ -172,7 +224,7 @@ function calculerSolde() {
     classe = "result-warn";
     document.getElementById('rendMonnaie').style.display = 'none';
   } else {
-    texte = "Solde nul";
+    texte = "Solde nul ✓";
     classe = "result-neutral";
     document.getElementById('rendMonnaie').style.display = 'none';
   }
@@ -220,7 +272,9 @@ function nouveauClient() {
   document.getElementById('nombreBoissons2E').value = '0';
   document.getElementById('nombreBoissons4E').value = '0';
   document.getElementById('nombreEauPlate').value = '0';
-  document.getElementById('nombreProduitSupp').value = '0';
+  for (let i = 0; i < 3; i++) {
+    document.getElementById(`nombreProduit${i}`).value = '0';
+  }
 
   const resultat = document.getElementById('resultat');
   resultat.textContent = '';
@@ -240,9 +294,13 @@ function resetForm() {
   document.getElementById('prix2').value = DEFAULT_CONFIG.prix2.toFixed(2);
   document.getElementById('prix4').value = DEFAULT_CONFIG.prix4.toFixed(2);
   document.getElementById('caution').value = DEFAULT_CONFIG.caution.toFixed(2);
-  document.getElementById('nomProduit').value = '';
-  document.getElementById('prixProduit').value = '0.00';
+
+  for (let i = 0; i < 3; i++) {
+    document.getElementById(`nomProduit${i}`).value = '';
+    document.getElementById(`prixProduitConfig${i}`).value = '0.00';
+    document.getElementById(`cautionProduit${i}`).checked = false;
+  }
 
   majAffichagePrix();
-  majProduitSupplementaire();
+  majProduitsSupplementaires();
 }

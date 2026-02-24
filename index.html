@@ -53,22 +53,40 @@
     <input type="number" id="nombreEauPlate" value="0" min="0" onfocus="clearZero(this)" onblur="resetToZero(this)">
   </div>
 
-  <!-- Produit supplémentaire (masqué si non configuré) -->
-  <div class="form-group" id="produitSupplementaireGroup" style="display:none;">
+  <!-- Produits supplémentaires (masqués si non configurés) -->
+  <div class="form-group produit-extra" id="produitGroup0" style="display:none;">
     <label>
-      <span class="drink-name" id="nomProduitLabel">Produit</span>
-      <span class="price-tag">(<span id="prixProduitLabel">0.00</span> €)</span>
+      <span class="drink-name" id="nomProduit0Label">Produit 1</span>
+      <span class="price-tag">
+        <span id="prixProduit0Label">0.00</span> €
+        <span class="caution-tag" id="cautionProduit0Tag"></span>
+      </span>
     </label>
-    <input type="number" id="nombreProduitSupp" value="0" min="0" onfocus="clearZero(this)" onblur="resetToZero(this)">
+    <input type="number" id="nombreProduit0" value="0" min="0" onfocus="clearZero(this)" onblur="resetToZero(this)">
   </div>
-<!-- Produit supplémentaire (masqué si non configuré) -->
-<div class="form-group" id="produitSupplementaireGroup" style="display:none;">
-  <label>
-    <span class="drink-name" id="nomProduitLabel">Produit</span>
-    <span class="price-tag">(<span id="prixProduitLabel">0.00</span> €)</span>
-  </label>
-  <input type="number" id="nombreProduitSupp" value="0" min="0" onfocus="clearZero(this)" onblur="resetToZero(this)">
-</div>
+
+  <div class="form-group produit-extra" id="produitGroup1" style="display:none;">
+    <label>
+      <span class="drink-name" id="nomProduit1Label">Produit 2</span>
+      <span class="price-tag">
+        <span id="prixProduit1Label">0.00</span> €
+        <span class="caution-tag" id="cautionProduit1Tag"></span>
+      </span>
+    </label>
+    <input type="number" id="nombreProduit1" value="0" min="0" onfocus="clearZero(this)" onblur="resetToZero(this)">
+  </div>
+
+  <div class="form-group produit-extra" id="produitGroup2" style="display:none;">
+    <label>
+      <span class="drink-name" id="nomProduit2Label">Produit 3</span>
+      <span class="price-tag">
+        <span id="prixProduit2Label">0.00</span> €
+        <span class="caution-tag" id="cautionProduit2Tag"></span>
+      </span>
+    </label>
+    <input type="number" id="nombreProduit2" value="0" min="0" onfocus="clearZero(this)" onblur="resetToZero(this)">
+  </div>
+
   <div class="buttons">
     <button class="btn-calc" onclick="calculerSolde()">💰 Calculer</button>
     <button class="btn-reset" onclick="nouveauClient()">🔄 Nouveau</button>
@@ -104,22 +122,70 @@
       <input type="number" id="prix4" value="4.00" step="0.01" min="0">
     </div>
     <div class="form-group">
-      <label>Caution :</label>
+      <label>Caution globale :</label>
       <input type="number" id="caution" value="2.00" step="0.01" min="0">
     </div>
 
-    <!-- Séparateur -->
-    <div class="settings-separator">
-      <span>➕ Produit supplémentaire</span>
+    <div class="settings-separator"><span>➕ Produits supplémentaires</span></div>
+
+    <!-- Produit 1 -->
+    <div class="produit-config-block">
+      <div class="produit-config-header">🧃 Produit 1</div>
+      <div class="form-group">
+        <label>Nom :</label>
+        <input type="text" id="nomProduit0" placeholder="ex : Chips" maxlength="20" oninput="majProduitsSupplementaires()">
+      </div>
+      <div class="form-group">
+        <label>Prix unitaire :</label>
+        <input type="number" id="prixProduitConfig0" value="0.00" step="0.01" min="0" oninput="majProduitsSupplementaires()">
+      </div>
+      <div class="form-group form-group-checkbox">
+        <label>Caution sur le verre :</label>
+        <label class="toggle">
+          <input type="checkbox" id="cautionProduit0" onchange="majProduitsSupplementaires()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
     </div>
 
-    <div class="form-group produit-supp-config">
-      <label>Nom du produit :</label>
-      <input type="text" id="nomProduit" placeholder="ex : Chips" maxlength="20" oninput="majProduitSupplementaire()">
+    <!-- Produit 2 -->
+    <div class="produit-config-block">
+      <div class="produit-config-header">🧃 Produit 2</div>
+      <div class="form-group">
+        <label>Nom :</label>
+        <input type="text" id="nomProduit1" placeholder="ex : Cocktail" maxlength="20" oninput="majProduitsSupplementaires()">
+      </div>
+      <div class="form-group">
+        <label>Prix unitaire :</label>
+        <input type="number" id="prixProduitConfig1" value="0.00" step="0.01" min="0" oninput="majProduitsSupplementaires()">
+      </div>
+      <div class="form-group form-group-checkbox">
+        <label>Caution sur le verre :</label>
+        <label class="toggle">
+          <input type="checkbox" id="cautionProduit1" onchange="majProduitsSupplementaires()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
     </div>
-    <div class="form-group">
-      <label>Prix unitaire :</label>
-      <input type="number" id="prixProduit" value="0.00" step="0.01" min="0" oninput="majProduitSupplementaire()">
+
+    <!-- Produit 3 -->
+    <div class="produit-config-block">
+      <div class="produit-config-header">🧃 Produit 3</div>
+      <div class="form-group">
+        <label>Nom :</label>
+        <input type="text" id="nomProduit2" placeholder="ex : Shot" maxlength="20" oninput="majProduitsSupplementaires()">
+      </div>
+      <div class="form-group">
+        <label>Prix unitaire :</label>
+        <input type="number" id="prixProduitConfig2" value="0.00" step="0.01" min="0" oninput="majProduitsSupplementaires()">
+      </div>
+      <div class="form-group form-group-checkbox">
+        <label>Caution sur le verre :</label>
+        <label class="toggle">
+          <input type="checkbox" id="cautionProduit2" onchange="majProduitsSupplementaires()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
     </div>
 
     <button class="btn-reset" onclick="resetForm()" style="width: 100%; margin-top: 10px;">🔄 Réinitialiser tout</button>
