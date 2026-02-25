@@ -57,7 +57,16 @@ function loadConfig() {
   if (raw) {
     const cfg = JSON.parse(raw);
     document.getElementById('caution').value = cfg.caution ?? 2.00;
-    produits = cfg.produits ?? cloneProduitsDef();
+
+    // Si les produits sauvegardés n'ont pas la propriété 'fixe',
+    // c'est une ancienne version — on repart des défauts
+    const produitsSauv = cfg.produits ?? [];
+    const valides = produitsSauv.every(p => 'fixe' in p && 'caution' in p);
+    if (valides && produitsSauv.length >= 3) {
+      produits = produitsSauv;
+    } else {
+      produits = cloneProduitsDef();
+    }
   } else {
     document.getElementById('caution').value = 2.00;
     produits = cloneProduitsDef();
