@@ -24,6 +24,7 @@
   <div class="caution-bubble" id="cautionBubble">Caution : 2.00 €</div>
   <h1 class="rainbow-title">Calcul cautions</h1>
 
+  <!-- Lignes principales -->
   <div class="form-group">
     <label>Gobelets rendus</label>
     <input type="number" id="nombreGobeletsRendus" value="0" min="0" onfocus="clearZero(this)" onblur="resetToZero(this)">
@@ -53,10 +54,10 @@
     <input type="number" id="nombreEauPlate" value="0" min="0" onfocus="clearZero(this)" onblur="resetToZero(this)">
   </div>
 
-  <!-- Produits supplémentaires (masqués si non configurés) -->
+  <!-- Produits supplémentaires dynamiques -->
   <div class="form-group produit-extra" id="produitGroup0" style="display:none;">
     <label>
-      <span class="drink-name" id="nomProduit0Label">Produit 1</span>
+      <span class="drink-name" id="nomProduit0Label"></span>
       <span class="price-tag">
         <span id="prixProduit0Label">0.00</span> €
         <span class="caution-tag" id="cautionProduit0Tag"></span>
@@ -67,7 +68,7 @@
 
   <div class="form-group produit-extra" id="produitGroup1" style="display:none;">
     <label>
-      <span class="drink-name" id="nomProduit1Label">Produit 2</span>
+      <span class="drink-name" id="nomProduit1Label"></span>
       <span class="price-tag">
         <span id="prixProduit1Label">0.00</span> €
         <span class="caution-tag" id="cautionProduit1Tag"></span>
@@ -78,7 +79,7 @@
 
   <div class="form-group produit-extra" id="produitGroup2" style="display:none;">
     <label>
-      <span class="drink-name" id="nomProduit2Label">Produit 3</span>
+      <span class="drink-name" id="nomProduit2Label"></span>
       <span class="price-tag">
         <span id="prixProduit2Label">0.00</span> €
         <span class="caution-tag" id="cautionProduit2Tag"></span>
@@ -109,10 +110,13 @@
     <p id="renduMonnaie"></p>
   </div>
 
+  <!-- Bouton paramètres principal -->
   <button class="settings-btn" onclick="toggleParametres()">⚙️ Paramètres</button>
 
+  <!-- Panneau paramètres principal -->
   <div id="parametres">
     <h3>⚙️ Configuration des prix</h3>
+
     <div class="form-group">
       <label>Prix softs :</label>
       <input type="number" id="prix2" value="2.00" step="0.01" min="0">
@@ -126,70 +130,53 @@
       <input type="number" id="caution" value="2.00" step="0.01" min="0">
     </div>
 
-    <div class="settings-separator"><span>➕ Produits supplémentaires</span></div>
+    <!-- Bouton sous-menu produits -->
+    <button class="btn-submenu" onclick="toggleSousMenuProduits()">
+      <span>🧃 Produits supplémentaires</span>
+      <span class="submenu-badge" id="produitsBadge"></span>
+      <span class="submenu-arrow" id="produitsArrow">▼</span>
+    </button>
 
-    <!-- Produit 1 -->
-    <div class="produit-config-block">
-      <div class="produit-config-header">🧃 Produit 1</div>
-      <div class="form-group">
-        <label>Nom :</label>
-        <input type="text" id="nomProduit0" placeholder="ex : Chips" maxlength="20" oninput="majProduitsSupplementaires()">
+    <!-- Sous-panneau produits -->
+    <div id="sousMenuProduits">
+
+      <!-- Formulaire produit actif -->
+      <div class="produit-nav">
+        <button class="btn-nav" onclick="navProduit(-1)">◀</button>
+        <span class="produit-nav-label" id="produitNavLabel">Produit 1 / 3</span>
+        <button class="btn-nav" onclick="navProduit(1)">▶</button>
       </div>
-      <div class="form-group">
-        <label>Prix unitaire :</label>
-        <input type="number" id="prixProduitConfig0" value="0.00" step="0.01" min="0" oninput="majProduitsSupplementaires()">
+
+      <div class="produit-form">
+        <div class="form-group">
+          <label>Nom :</label>
+          <input type="text" id="nomProduitActif" placeholder="ex : Chips" maxlength="20" oninput="syncProduitActif()">
+        </div>
+        <div class="form-group">
+          <label>Prix unitaire :</label>
+          <input type="number" id="prixProduitActif" value="0.00" step="0.01" min="0" oninput="syncProduitActif()">
+        </div>
+        <div class="form-group form-group-checkbox">
+          <label>Caution sur le verre :</label>
+          <label class="toggle">
+            <input type="checkbox" id="cautionProduitActif" onchange="syncProduitActif()">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <!-- Pastilles de navigation -->
+        <div class="produit-dots">
+          <span class="produit-dot" id="dot0" onclick="allerProduit(0)"></span>
+          <span class="produit-dot" id="dot1" onclick="allerProduit(1)"></span>
+          <span class="produit-dot" id="dot2" onclick="allerProduit(2)"></span>
+        </div>
       </div>
-      <div class="form-group form-group-checkbox">
-        <label>Caution sur le verre :</label>
-        <label class="toggle">
-          <input type="checkbox" id="cautionProduit0" onchange="majProduitsSupplementaires()">
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
+
     </div>
 
-    <!-- Produit 2 -->
-    <div class="produit-config-block">
-      <div class="produit-config-header">🧃 Produit 2</div>
-      <div class="form-group">
-        <label>Nom :</label>
-        <input type="text" id="nomProduit1" placeholder="ex : Cocktail" maxlength="20" oninput="majProduitsSupplementaires()">
-      </div>
-      <div class="form-group">
-        <label>Prix unitaire :</label>
-        <input type="number" id="prixProduitConfig1" value="0.00" step="0.01" min="0" oninput="majProduitsSupplementaires()">
-      </div>
-      <div class="form-group form-group-checkbox">
-        <label>Caution sur le verre :</label>
-        <label class="toggle">
-          <input type="checkbox" id="cautionProduit1" onchange="majProduitsSupplementaires()">
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-    </div>
-
-    <!-- Produit 3 -->
-    <div class="produit-config-block">
-      <div class="produit-config-header">🧃 Produit 3</div>
-      <div class="form-group">
-        <label>Nom :</label>
-        <input type="text" id="nomProduit2" placeholder="ex : Shot" maxlength="20" oninput="majProduitsSupplementaires()">
-      </div>
-      <div class="form-group">
-        <label>Prix unitaire :</label>
-        <input type="number" id="prixProduitConfig2" value="0.00" step="0.01" min="0" oninput="majProduitsSupplementaires()">
-      </div>
-      <div class="form-group form-group-checkbox">
-        <label>Caution sur le verre :</label>
-        <label class="toggle">
-          <input type="checkbox" id="cautionProduit2" onchange="majProduitsSupplementaires()">
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-    </div>
-
-    <button class="btn-reset" onclick="resetForm()" style="width: 100%; margin-top: 10px;">🔄 Réinitialiser tout</button>
+    <button class="btn-reset" onclick="resetForm()" style="width:100%; margin-top:14px;">🔄 Réinitialiser tout</button>
   </div>
+
 </div>
 
 <footer id="footer">Version <span id="app-version">...</span> — Verre'ifieur</footer>
