@@ -11,8 +11,8 @@ const DEFAULT_CONFIG = {
 };
 
 // ─── État global ──────────────────────────────────────────────────────────────
-let soldeDu       = 0;
-let produitActif  = 0; // index 0-2 du formulaire produit affiché
+let soldeDu      = 0;
+let produitActif = 0;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function clearZero(input) {
@@ -23,10 +23,8 @@ function clearZero(input) {
 
 function resetToZero(input) {
   if (input.value === '' || input.value === null) {
-    // Si c'est un champ prix (step="0.01"), remettre 0.00
     input.value = input.step === '0.01' ? '0.00' : '0';
   }
-  // Si c'est un champ prix, synchroniser le produit actif
   if (input.id === 'prixProduitActif') {
     syncProduitActif();
   }
@@ -80,7 +78,6 @@ function loadConfig() {
   const produits = cfg?.produits ?? DEFAULT_CONFIG.produits;
   for (let i = 0; i < 3; i++) {
     const p = produits[i] ?? { nom: '', prix: 0.00, caution: false };
-    // On stocke dans des attributs data sur les inputs cachés
     setDataProduit(i, p.nom, p.prix, p.caution);
   }
 }
@@ -98,15 +95,12 @@ function saveConfig() {
   }));
 }
 
-// ─── Stockage produits via dataset sur le DOM ──────────────────────────────────
-// On utilise des inputs cachés pour stocker les 3 produits indépendamment
-// du formulaire "actif" affiché.
-
+// ─── Stockage produits (via dataset sur éléments span cachés) ─────────────────
 function getDataProduit(i) {
   const el = document.getElementById(`produitData${i}`);
   if (!el) return { nom: '', prix: 0, caution: false };
   return {
-    nom:     el.dataset.nom     ?? '',
+    nom:     el.dataset.nom ?? '',
     prix:    parseFloat(el.dataset.prix) || 0,
     caution: el.dataset.caution === 'true'
   };
@@ -125,20 +119,20 @@ function setDataProduit(i, nom, prix, caution) {
   el.dataset.caution = caution;
 }
 
-// ─── Affichage des prix principaux ────────────────────────────────────────────
+// ─── Affichage prix principaux ────────────────────────────────────────────────
 function majAffichagePrix() {
   const prix2   = parseFloat(document.getElementById('prix2').value)   || 0;
   const prix4   = parseFloat(document.getElementById('prix4').value)   || 0;
   const caution = parseFloat(document.getElementById('caution').value) || 0;
 
-  document.getElementById('prix2E').textContent       = prix2.toFixed(2);
-  document.getElementById('prix4E').textContent       = prix4.toFixed(2);
+  document.getElementById('prix2E').textContent        = prix2.toFixed(2);
+  document.getElementById('prix4E').textContent        = prix4.toFixed(2);
   document.getElementById('cautionBubble').textContent = `Caution : ${caution.toFixed(2)} €`;
 
   saveConfig();
 }
 
-// ─── Produits supplémentaires (lignes calculator) ─────────────────────────────
+// ─── Produits supplémentaires (lignes calculateur) ────────────────────────────
 function majProduitsSupplementaires() {
   const cautionGlobale = parseFloat(document.getElementById('caution').value) || 0;
   let nbActifs = 0;
@@ -154,11 +148,11 @@ function majProduitsSupplementaires() {
 
       const tag = document.getElementById(`cautionProduit${i}Tag`);
       if (p.caution) {
-        tag.textContent    = `+ ${cautionGlobale.toFixed(2)} € caution`;
-        tag.style.display  = 'inline';
+        tag.textContent   = `+ ${cautionGlobale.toFixed(2)} € caution`;
+        tag.style.display = 'inline';
       } else {
-        tag.textContent    = '';
-        tag.style.display  = 'none';
+        tag.textContent   = '';
+        tag.style.display = 'none';
       }
       group.style.display = 'flex';
     } else {
@@ -167,9 +161,9 @@ function majProduitsSupplementaires() {
     }
   }
 
-  // Badge sur le bouton sous-menu
+  // Badge bouton sous-menu
   const badge = document.getElementById('produitsBadge');
-  badge.textContent = nbActifs > 0 ? nbActifs : '';
+  badge.textContent   = nbActifs > 0 ? nbActifs : '';
   badge.style.display = nbActifs > 0 ? 'inline-flex' : 'none';
 }
 
@@ -178,14 +172,12 @@ function toggleSousMenuProduits() {
   const panel = document.getElementById('sousMenuProduits');
   const arrow = document.getElementById('produitsArrow');
   const open  = panel.style.display === 'block';
-
   panel.style.display = open ? 'none' : 'block';
   arrow.textContent   = open ? '▼' : '▲';
 }
 
-// Navigation entre les 3 produits
+// ─── Navigation produits ──────────────────────────────────────────────────────
 function navProduit(delta) {
-  // Sauvegarder d'abord le formulaire actuel
   sauvegarderFormulaireActif();
   produitActif = (produitActif + delta + 3) % 3;
   afficherFormulaireProductActif();
@@ -200,13 +192,11 @@ function allerProduit(index) {
 function afficherFormulaireProductActif() {
   const p = getDataProduit(produitActif);
 
-  document.getElementById('nomProduitActif').value       = p.nom;
-  document.getElementById('prixProduitActif').value      = p.prix === 0 ? '0.00' : p.prix;
-  document.getElementById('cautionProduitActif').checked = p.caution;
-
+  document.getElementById('nomProduitActif').value       = p.nom ?? '';
+  document.getElementById('prixProduitActif').value      = p.prix > 0 ? p.prix : '0.00';
+  document.getElementById('cautionProduitActif').checked = p.caution ?? false;
   document.getElementById('produitNavLabel').textContent = `Produit ${produitActif + 1} / 3`;
 
-  // Pastilles
   for (let i = 0; i < 3; i++) {
     const dot = document.getElementById(`dot${i}`);
     const dp  = getDataProduit(i);
@@ -219,16 +209,14 @@ function sauvegarderFormulaireActif() {
   const nom     = document.getElementById('nomProduitActif').value.trim();
   const prix    = parseFloat(document.getElementById('prixProduitActif').value) || 0;
   const caution = document.getElementById('cautionProduitActif').checked;
-
   setDataProduit(produitActif, nom, prix, caution);
   majProduitsSupplementaires();
   saveConfig();
 }
 
-// Sync en temps réel quand on tape dans le formulaire actif
 function syncProduitActif() {
   sauvegarderFormulaireActif();
-  afficherFormulaireProductActif(); // rafraîchit les pastilles
+  afficherFormulaireProductActif();
 }
 
 // ─── Toggle paramètres ────────────────────────────────────────────────────────
@@ -236,11 +224,9 @@ function toggleParametres() {
   const params = document.getElementById('parametres');
   const open   = params.style.display === 'block';
   params.style.display = open ? 'none' : 'block';
-
-  // Fermer le sous-menu si on ferme les paramètres
   if (open) {
     document.getElementById('sousMenuProduits').style.display = 'none';
-    document.getElementById('produitsArrow').textContent = '▼';
+    document.getElementById('produitsArrow').textContent      = '▼';
   }
 }
 
@@ -255,9 +241,9 @@ function calculerSolde() {
   const prix4   = parseFloat(document.getElementById('prix4').value)   || 0;
   const caution = parseFloat(document.getElementById('caution').value) || 0;
 
-  const totalBoissons       = (nbBoissons2E * prix2) + (nbBoissons4E * prix4);
-  let   totalCautionDue     = caution * (nbBoissons2E + nbBoissons4E + nbEauPlate);
-  let   totalProduitsSupp   = 0;
+  const totalBoissons   = (nbBoissons2E * prix2) + (nbBoissons4E * prix4);
+  let totalCautionDue   = caution * (nbBoissons2E + nbBoissons4E + nbEauPlate);
+  let totalProduitsSupp = 0;
 
   for (let i = 0; i < 3; i++) {
     const p  = getDataProduit(i);
@@ -300,7 +286,6 @@ function calculerSolde() {
 function calculerRenduMonnaie() {
   const montantDonne = parseFloat(document.getElementById('montantDonne').value) || 0;
   const el           = document.getElementById('renduMonnaie');
-
   if (montantDonne === 0) { el.textContent = ''; return; }
 
   const diff = montantDonne - soldeDu;
@@ -325,18 +310,20 @@ function setMontant(montant) {
 // ─── Nouveau client ───────────────────────────────────────────────────────────
 function nouveauClient() {
   vibrate(30);
-  ['nombreGobeletsRendus','nombreBoissons2E','nombreBoissons4E','nombreEauPlate'].forEach(id => {
+  ['nombreGobeletsRendus', 'nombreBoissons2E', 'nombreBoissons4E', 'nombreEauPlate'].forEach(id => {
     document.getElementById(id).value = '0';
   });
-  for (let i = 0; i < 3; i++) document.getElementById(`nombreProduit${i}`).value = '0';
+  for (let i = 0; i < 3; i++) {
+    document.getElementById(`nombreProduit${i}`).value = '0';
+  }
 
   const r = document.getElementById('resultat');
   r.textContent = '';
   r.className   = 'result-box';
 
-  document.getElementById('rendMonnaie').style.display  = 'none';
-  document.getElementById('montantDonne').value          = '0';
-  document.getElementById('renduMonnaie').textContent    = '';
+  document.getElementById('rendMonnaie').style.display = 'none';
+  document.getElementById('montantDonne').value        = '0';
+  document.getElementById('renduMonnaie').textContent  = '';
   soldeDu = 0;
 }
 
@@ -344,16 +331,12 @@ function nouveauClient() {
 function resetForm() {
   nouveauClient();
 
-  document.getElementById('prix2').value   = DEFAULT_CONFIG.prix2.toFixed(2);
-  document.getElementById('prix4').value   = DEFAULT_CONFIG.prix4.toFixed(2);
-  document.getElementById('caution').value = DEFAULT_CONFIG.caution.toFixed(2);
-
-  // Remettre les 3 produits à zéro
+  // Efface les produits, conserve les prix
   for (let i = 0; i < 3; i++) {
     setDataProduit(i, '', 0, false);
   }
 
-  // Vider aussi le formulaire actif visible
+  // Vide le formulaire visible
   document.getElementById('nomProduitActif').value       = '';
   document.getElementById('prixProduitActif').value      = '0.00';
   document.getElementById('cautionProduitActif').checked = false;
@@ -361,14 +344,12 @@ function resetForm() {
   // Revenir au produit 1
   produitActif = 0;
 
-  majAffichagePrix();
   majProduitsSupplementaires();
   afficherFormulaireProductActif();
 
-  // Fermer le sous-menu produits
+  // Fermer le sous-menu
   document.getElementById('sousMenuProduits').style.display = 'none';
   document.getElementById('produitsArrow').textContent      = '▼';
 
-  // Vider le localStorage complètement
-  localStorage.removeItem('verrifieur-config');
+  saveConfig();
 }
