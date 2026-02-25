@@ -348,12 +348,27 @@ function resetForm() {
   document.getElementById('prix4').value   = DEFAULT_CONFIG.prix4.toFixed(2);
   document.getElementById('caution').value = DEFAULT_CONFIG.caution.toFixed(2);
 
+  // Remettre les 3 produits à zéro
   for (let i = 0; i < 3; i++) {
     setDataProduit(i, '', 0, false);
   }
 
+  // Vider aussi le formulaire actif visible
+  document.getElementById('nomProduitActif').value       = '';
+  document.getElementById('prixProduitActif').value      = '0.00';
+  document.getElementById('cautionProduitActif').checked = false;
+
+  // Revenir au produit 1
   produitActif = 0;
+
   majAffichagePrix();
   majProduitsSupplementaires();
   afficherFormulaireProductActif();
+
+  // Fermer le sous-menu produits
+  document.getElementById('sousMenuProduits').style.display = 'none';
+  document.getElementById('produitsArrow').textContent      = '▼';
+
+  // Vider le localStorage complètement
+  localStorage.removeItem('verrifieur-config');
 }
