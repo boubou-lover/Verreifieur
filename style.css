@@ -43,13 +43,13 @@ body {
 .caution-bubble {
   position: absolute;
   top: -15px; right: -15px;
-  background: linear-gradient(135deg, #ffa500 0%, #ff8c00 100%);
+  background: linear-gradient(135deg, #ffa500, #ff8c00);
   color: #000;
   padding: 8px 16px;
   border-radius: 50px;
   font-size: 14px;
   font-weight: bold;
-  box-shadow: 0 4px 12px rgba(255,165,0,0.4), 0 0 20px rgba(255,165,0,0.2);
+  box-shadow: 0 4px 12px rgba(255,165,0,0.4);
   animation: pulse 2s ease-in-out infinite;
 }
 @keyframes pulse {
@@ -75,11 +75,11 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 15px 0;
+  margin: 12px 0;
   padding: 12px;
   background: rgba(0,0,0,0.2);
   border-radius: 10px;
-  transition: background 0.2s ease;
+  transition: background 0.2s;
 }
 .form-group:hover { background: rgba(0,0,0,0.3); }
 
@@ -90,26 +90,19 @@ body {
   color: #ddd;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
 }
-.form-group label .drink-name { font-weight: 500; font-size: 15px; color: #fff; }
-.form-group label .price-tag  { font-size: 13px; color: #ffa500; font-weight: 600; }
-.form-group label .note       { font-size: 12px; color: #999; font-style: italic; }
+.drink-name  { font-weight: 500; font-size: 15px; color: #fff; }
+.price-tag   { font-size: 13px; color: #ffa500; font-weight: 600; }
+.caution-tag { font-size: 11px; color: #ffcc66; font-style: italic; margin-left: 4px; }
 
-.caution-tag {
-  font-size: 11px;
-  color: #ffcc66;
-  font-weight: 500;
-  font-style: italic;
-}
-
-/* Produit extra */
+/* Produits ajoutés */
 .produit-extra {
-  border: 1px dashed rgba(255,165,0,0.35);
-  background: rgba(255,165,0,0.05) !important;
+  border: 1px dashed rgba(255,165,0,0.3);
+  background: rgba(255,165,0,0.04) !important;
   animation: slideIn 0.25s ease;
 }
-.produit-extra:hover { background: rgba(255,165,0,0.09) !important; }
+.produit-extra:hover { background: rgba(255,165,0,0.08) !important; }
 
 /* INPUTS */
 input[type="number"] {
@@ -122,7 +115,7 @@ input[type="number"] {
   color: #fff;
   font-size: 18px;
   font-weight: bold;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
 }
 input[type="number"]:focus {
   outline: none;
@@ -134,14 +127,14 @@ input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button { opacity:1; height:40px; }
 
 input[type="text"] {
-  width: 150px;
-  padding: 10px 12px;
+  width: 160px;
+  padding: 9px 12px;
   border-radius: 8px;
   border: 2px solid #444;
   background: #333;
   color: #fff;
   font-size: 14px;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
 }
 input[type="text"]::placeholder { color: #666; font-style: italic; }
 input[type="text"]:focus {
@@ -151,28 +144,19 @@ input[type="text"]:focus {
   box-shadow: 0 0 0 3px rgba(255,165,0,0.1);
 }
 
-/* CHECKBOX ROW */
-.form-group-checkbox { align-items: center; }
-.form-group-checkbox > label:first-child {
-  font-size: 14px;
-  color: #ccc;
-  flex-direction: row;
-  align-items: center;
-}
-
 /* TOGGLE SWITCH */
 .toggle {
   position: relative;
   display: inline-block;
   width: 52px; height: 28px;
   flex-shrink: 0;
-  margin: 0;
   cursor: pointer;
+  margin: 0;
 }
 .toggle input { opacity:0; width:0; height:0; position:absolute; }
 .toggle-slider {
   position: absolute;
-  top:0; left:0; right:0; bottom:0;
+  inset: 0;
   background: #444;
   border-radius: 28px;
   transition: 0.3s;
@@ -180,7 +164,7 @@ input[type="text"]:focus {
 .toggle-slider::before {
   content: '';
   position: absolute;
-  height: 20px; width: 20px;
+  width: 20px; height: 20px;
   left: 4px; bottom: 4px;
   background: #888;
   border-radius: 50%;
@@ -193,11 +177,11 @@ input[type="text"]:focus {
 .toggle input:checked + .toggle-slider::before {
   transform: translateX(24px);
   background: #ffa500;
-  box-shadow: 0 0 8px rgba(255,165,0,0.6);
+  box-shadow: 0 0 8px rgba(255,165,0,0.5);
 }
 
-/* BOUTONS */
-.buttons { display:flex; gap:12px; margin-top:25px; }
+/* BOUTONS PRINCIPAUX */
+.buttons { display:flex; gap:12px; margin-top:20px; }
 
 button {
   padding: 14px 20px;
@@ -207,36 +191,48 @@ button {
   font-weight: bold;
   cursor: pointer;
   flex: 1;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 button:active { transform: translateY(2px); box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
 
-.btn-calc { background: linear-gradient(135deg, #4caf50 0%, #45a049 100%); color:#fff; }
-.btn-calc:hover { background: linear-gradient(135deg, #45a049, #3d8b40); box-shadow: 0 6px 15px rgba(76,175,80,0.4); }
+.btn-calc { background: linear-gradient(135deg,#4caf50,#45a049); color:#fff; }
+.btn-calc:hover { box-shadow: 0 6px 15px rgba(76,175,80,0.4); }
 
-.btn-reset { background: linear-gradient(135deg, #666 0%, #555 100%); color:#fff; }
-.btn-reset:hover { background: linear-gradient(135deg, #777, #666); }
+.btn-reset { background: linear-gradient(135deg,#666,#555); color:#fff; }
+.btn-reset:hover { background: linear-gradient(135deg,#777,#666); }
 
 .settings-btn {
   width: 100%;
-  margin-top: 20px;
-  background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
+  margin-top: 18px;
+  background: linear-gradient(135deg,#2a2a2a,#1f1f1f);
   color: #ffa500;
   border: 2px solid #444;
 }
-.settings-btn:hover { background: linear-gradient(135deg, #333, #2a2a2a); border-color: #ffa500; }
+.settings-btn:hover { border-color: #ffa500; background: linear-gradient(135deg,#333,#2a2a2a); }
 
-/* ── BOUTON SOUS-MENU PRODUITS ────────────────────────────────────────────── */
+/* PARAMÈTRES */
+#parametres {
+  margin-top: 14px;
+  padding: 20px;
+  background: rgba(0,0,0,0.3);
+  border-radius: 12px;
+  border: 2px solid #444;
+  display: none;
+  animation: slideIn 0.25s ease;
+}
+#parametres h3 { margin: 0 0 18px; text-align:center; color:#ffa500; }
+
+/* BOUTON SOUS-MENU PRODUITS */
 .btn-submenu {
   width: 100%;
-  margin-top: 16px;
+  margin-top: 14px;
   padding: 13px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(255,165,0,0.08);
-  border: 1px solid rgba(255,165,0,0.3);
+  background: rgba(255,165,0,0.07);
+  border: 1px solid rgba(255,165,0,0.25);
   border-radius: 10px;
   color: #ffa500;
   font-size: 15px;
@@ -245,98 +241,124 @@ button:active { transform: translateY(2px); box-shadow: 0 2px 5px rgba(0,0,0,0.3
   flex: unset;
   transition: background 0.2s, border-color 0.2s;
 }
-.btn-submenu:hover { background: rgba(255,165,0,0.14); border-color: #ffa500; }
+.btn-submenu:hover { background: rgba(255,165,0,0.13); border-color: #ffa500; }
 
 .submenu-badge {
-  display: none;
   background: #ffa500;
   color: #000;
   font-size: 11px;
   font-weight: 800;
   width: 20px; height: 20px;
   border-radius: 50%;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   margin-left: auto;
   margin-right: 8px;
 }
 
-.submenu-arrow {
-  font-size: 11px;
-  opacity: 0.7;
-  flex-shrink: 0;
-}
+.submenu-arrow { font-size: 11px; opacity: 0.7; flex-shrink: 0; }
 
-/* ── SOUS-PANNEAU PRODUITS ────────────────────────────────────────────────── */
+/* SOUS-PANNEAU PRODUITS */
 #sousMenuProduits {
   display: none;
   margin-top: 10px;
-  padding: 16px;
-  background: rgba(0,0,0,0.25);
-  border-radius: 12px;
-  border: 1px solid rgba(255,165,0,0.15);
   animation: slideIn 0.25s ease;
 }
 
-/* Navigation produit 1/2/3 */
-.produit-nav {
+/* BLOC CONFIG PRODUIT */
+.produit-config-block {
+  background: rgba(0,0,0,0.2);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+.produit-config-block .form-group {
+  margin: 8px 0;
+  padding: 8px 10px;
+  background: rgba(0,0,0,0.15);
+}
+.produit-config-block .form-group:last-child { margin-bottom: 0; }
+.produit-config-block .form-group label {
+  font-size: 13px;
+  color: #bbb;
+  flex-direction: row;
+  align-items: center;
+  gap: 0;
+  margin-right: 10px;
+}
+
+.produit-config-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 14px;
-}
-
-.produit-nav-label {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   color: #ffa500;
-  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 8px;
+  padding: 0 2px;
 }
 
-.btn-nav {
-  width: 36px; height: 36px;
-  padding: 0;
-  display: flex; align-items: center; justify-content: center;
-  background: rgba(255,165,0,0.12);
-  border: 1px solid rgba(255,165,0,0.3);
-  border-radius: 8px;
-  color: #ffa500;
+/* Bouton supprimer produit */
+.btn-suppr {
+  background: rgba(255,80,80,0.15);
+  border: 1px solid rgba(255,80,80,0.3);
+  border-radius: 6px;
+  color: #ff6666;
   font-size: 14px;
+  padding: 3px 8px;
+  cursor: pointer;
   flex: unset;
   box-shadow: none;
+  line-height: 1;
+  min-width: unset;
+  transition: background 0.2s;
 }
-.btn-nav:hover { background: rgba(255,165,0,0.22); }
-.btn-nav:active { transform: scale(0.93); }
+.btn-suppr:hover { background: rgba(255,80,80,0.28); }
+.btn-suppr:active { transform: scale(0.95); }
 
-/* Formulaire du produit actif */
-.produit-form .form-group {
-  margin: 10px 0;
-  padding: 10px 12px;
-}
-
-/* Pastilles de navigation */
-.produit-dots {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 14px;
-}
-
-.produit-dot {
-  width: 10px; height: 10px;
-  border-radius: 50%;
-  background: #444;
-  border: 2px solid #555;
+/* Bouton ajouter produit */
+.btn-ajouter {
+  width: 100%;
+  margin-top: 4px;
+  padding: 12px;
+  background: rgba(255,165,0,0.07);
+  border: 1px dashed rgba(255,165,0,0.4);
+  border-radius: 10px;
+  color: #ffa500;
+  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
-  display: inline-block;
+  flex: unset;
+  box-shadow: none;
+  transition: background 0.2s;
 }
-.produit-dot.filled  { background: rgba(255,165,0,0.35); border-color: rgba(255,165,0,0.5); }
-.produit-dot.active  { background: #ffa500; border-color: #ffa500; box-shadow: 0 0 6px rgba(255,165,0,0.5); transform: scale(1.2); }
+.btn-ajouter:hover { background: rgba(255,165,0,0.14); }
+
+/* Bouton réinitialiser danger */
+.btn-danger {
+  width: 100%;
+  margin-top: 14px;
+  padding: 12px;
+  background: rgba(255,80,80,0.1);
+  border: 1px solid rgba(255,80,80,0.3);
+  border-radius: 10px;
+  color: #ff8080;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  flex: unset;
+  box-shadow: none;
+  transition: background 0.2s;
+}
+.btn-danger:hover { background: rgba(255,80,80,0.2); }
 
 /* RÉSULTAT */
 .result-box {
-  margin-top: 25px;
+  margin-top: 20px;
   padding: 18px;
   border-radius: 12px;
   font-size: 24px;
@@ -350,17 +372,17 @@ button:active { transform: translateY(2px); box-shadow: 0 2px 5px rgba(0,0,0,0.3
 
 /* RENDU MONNAIE */
 #rendMonnaie {
-  margin-top: 25px;
+  margin-top: 20px;
   padding: 20px;
   background: rgba(0,0,0,0.3);
   border-radius: 12px;
   border: 2px solid #444;
   display: none;
-  animation: slideIn 0.3s ease;
+  animation: slideIn 0.25s ease;
 }
-#rendMonnaie h3 { margin:0 0 15px; text-align:center; color:#ffa500; font-size:18px; }
+#rendMonnaie h3 { margin:0 0 14px; text-align:center; color:#ffa500; font-size:18px; }
 
-.quick-buttons { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:15px 0; }
+.quick-buttons { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:14px 0; }
 
 .btn-quick {
   padding: 12px 8px;
@@ -371,45 +393,33 @@ button:active { transform: translateY(2px); box-shadow: 0 2px 5px rgba(0,0,0,0.3
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 3px 8px rgba(255,165,0,0.3);
   flex: unset;
+  box-shadow: 0 3px 8px rgba(255,165,0,0.3);
+  transition: all 0.2s;
 }
-.btn-quick:hover { transform:translateY(-2px); box-shadow:0 5px 12px rgba(255,165,0,0.5); }
-.btn-quick:active { transform:translateY(0); }
+.btn-quick:hover { transform: translateY(-2px); box-shadow: 0 5px 12px rgba(255,165,0,0.5); }
+.btn-quick:active { transform: translateY(0); }
 
 #renduMonnaie {
   text-align: center;
   font-size: 20px;
   font-weight: bold;
-  margin-top: 15px;
+  margin-top: 14px;
   padding: 10px;
   border-radius: 8px;
   background: rgba(0,0,0,0.2);
 }
 
-/* PARAMÈTRES */
-#parametres {
-  margin-top: 15px;
-  padding: 20px;
-  background: rgba(0,0,0,0.3);
-  border-radius: 12px;
-  border: 2px solid #444;
-  display: none;
-  animation: slideIn 0.3s ease;
-}
-#parametres h3 { margin:0 0 20px; text-align:center; color:#ffa500; }
-
 /* FOOTER */
-footer { margin-top:40px; font-size:13px; color:#666; text-align:center; opacity:0.7; }
+footer { margin-top:36px; font-size:13px; color:#666; text-align:center; opacity:0.7; }
 
 /* ANIMATIONS */
 @keyframes fadeIn  { from { opacity:0; } to { opacity:1; } }
 @keyframes slideIn { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
 
 /* ACCESSIBILITÉ */
-button:focus, input:focus { outline:3px solid #ffa500; outline-offset:2px; }
-::selection { background:#ffa500; color:#000; }
+button:focus, input:focus { outline: 3px solid #ffa500; outline-offset: 2px; }
+::selection { background: #ffa500; color: #000; }
 
 /* RESPONSIVE */
 @media (max-width: 480px) {
@@ -419,6 +429,6 @@ button:focus, input:focus { outline:3px solid #ffa500; outline-offset:2px; }
   button { font-size: 14px; padding: 12px 16px; }
   .btn-quick { font-size: 14px; padding: 10px 6px; }
   input[type="number"] { width: 80px; font-size: 16px; }
-  input[type="text"]   { width: 120px; font-size: 13px; }
+  input[type="text"]   { width: 130px; font-size: 13px; }
   .result-box { font-size: 20px; }
 }

@@ -1,32 +1,22 @@
-// ─── Config par défaut ───────────────────────────────────────────────────────
-const DEFAULT_CONFIG = {
-  caution: 2.00,
-  prix2:   2.00,
-  prix4:   4.00,
-  produits: [
-    { nom: '', prix: 0.00, caution: false },
-    { nom: '', prix: 0.00, caution: false },
-    { nom: '', prix: 0.00, caution: false }
-  ]
-};
+// ─── Produits par défaut (non supprimables) ───────────────────────────────────
+const PRODUITS_DEFAUT = [
+  { nom: 'Bières & softs',   prix: 2.00, caution: true,  fixe: true },
+  { nom: 'Bières spéciales', prix: 4.00, caution: true,  fixe: true },
+  { nom: 'Eau plate',        prix: 0.00, caution: true,  fixe: true }
+];
 
 // ─── État global ──────────────────────────────────────────────────────────────
-let soldeDu      = 0;
-let produitActif = 0;
+let produits  = [];   // tableau de tous les produits (défaut + ajoutés)
+let soldeDu   = 0;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function clearZero(input) {
-  if (parseFloat(input.value) === 0 || input.value === '') {
-    input.value = '';
-  }
+  if (parseFloat(input.value) === 0 || input.value === '') input.value = '';
 }
 
 function resetToZero(input) {
   if (input.value === '' || input.value === null) {
     input.value = input.step === '0.01' ? '0.00' : '0';
-  }
-  if (input.id === 'prixProduitActif') {
-    syncProduitActif();
   }
 }
 
@@ -34,20 +24,15 @@ function vibrate(pattern) {
   if ('vibrate' in navigator) navigator.vibrate(pattern);
 }
 
+function getCaution() {
+  return parseFloat(document.getElementById('caution').value) || 0;
+}
+
 // ─── Init ─────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   loadConfig();
-  majAffichagePrix();
-  majProduitsSupplementaires();
-  afficherFormulaireProductActif();
+  renderAll();
   displayVersion();
-
-  document.getElementById('prix2').addEventListener('input', majAffichagePrix);
-  document.getElementById('prix4').addEventListener('input', majAffichagePrix);
-  document.getElementById('caution').addEventListener('input', () => {
-    majAffichagePrix();
-    majProduitsSupplementaires();
-  });
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/service-worker.js')
@@ -69,105 +54,198 @@ async function displayVersion() {
 // ─── LocalStorage ─────────────────────────────────────────────────────────────
 function loadConfig() {
   const raw = localStorage.getItem('verrifieur-config');
-  const cfg = raw ? JSON.parse(raw) : null;
-
-  document.getElementById('prix2').value   = cfg?.prix2   ?? DEFAULT_CONFIG.prix2;
-  document.getElementById('prix4').value   = cfg?.prix4   ?? DEFAULT_CONFIG.prix4;
-  document.getElementById('caution').value = cfg?.caution ?? DEFAULT_CONFIG.caution;
-
-  const produits = cfg?.produits ?? DEFAULT_CONFIG.produits;
-  for (let i = 0; i < 3; i++) {
-    const p = produits[i] ?? { nom: '', prix: 0.00, caution: false };
-    setDataProduit(i, p.nom, p.prix, p.caution);
+  if (raw) {
+    const cfg = JSON.parse(raw);
+    document.getElementById('caution').value = cfg.caution ?? 2.00;
+    produits = cfg.produits ?? cloneProduitsDef();
+  } else {
+    document.getElementById('caution').value = 2.00;
+    produits = cloneProduitsDef();
   }
 }
 
 function saveConfig() {
-  const produits = [];
-  for (let i = 0; i < 3; i++) {
-    produits.push(getDataProduit(i));
-  }
   localStorage.setItem('verrifieur-config', JSON.stringify({
-    prix2:   parseFloat(document.getElementById('prix2').value)   || 0,
-    prix4:   parseFloat(document.getElementById('prix4').value)   || 0,
-    caution: parseFloat(document.getElementById('caution').value) || 0,
-    produits
+    caution:  getCaution(),
+    produits: produits
   }));
 }
 
-// ─── Stockage produits (via dataset sur éléments span cachés) ─────────────────
-function getDataProduit(i) {
-  const el = document.getElementById(`produitData${i}`);
-  if (!el) return { nom: '', prix: 0, caution: false };
-  return {
-    nom:     el.dataset.nom ?? '',
-    prix:    parseFloat(el.dataset.prix) || 0,
-    caution: el.dataset.caution === 'true'
-  };
+function cloneProduitsDef() {
+  return PRODUITS_DEFAUT.map(p => ({ ...p }));
 }
 
-function setDataProduit(i, nom, prix, caution) {
-  let el = document.getElementById(`produitData${i}`);
-  if (!el) {
-    el = document.createElement('span');
-    el.id = `produitData${i}`;
-    el.style.display = 'none';
-    document.body.appendChild(el);
-  }
-  el.dataset.nom     = nom;
-  el.dataset.prix    = prix;
-  el.dataset.caution = caution;
+// ─── Rendu principal ──────────────────────────────────────────────────────────
+
+// Rend les lignes du calculateur ET la liste dans les paramètres
+function renderAll() {
+  renderLignesProduits();
+  renderListeParametres();
+  updateCautionBubble();
+  updateBadge();
 }
 
-// ─── Affichage prix principaux ────────────────────────────────────────────────
-function majAffichagePrix() {
-  const prix2   = parseFloat(document.getElementById('prix2').value)   || 0;
-  const prix4   = parseFloat(document.getElementById('prix4').value)   || 0;
-  const caution = parseFloat(document.getElementById('caution').value) || 0;
+// Lignes de saisie dans le calculateur
+function renderLignesProduits() {
+  const container = document.getElementById('lignesProduits');
+  container.innerHTML = '';
 
-  document.getElementById('prix2E').textContent        = prix2.toFixed(2);
-  document.getElementById('prix4E').textContent        = prix4.toFixed(2);
-  document.getElementById('cautionBubble').textContent = `Caution : ${caution.toFixed(2)} €`;
+  produits.forEach((p, i) => {
+    const caution = getCaution();
+    const prixTotal = p.caution ? p.prix + caution : p.prix;
 
+    const div = document.createElement('div');
+    div.className = p.fixe ? 'form-group' : 'form-group produit-extra';
+    div.id = `ligneP${i}`;
+
+    const labelEl = document.createElement('label');
+    labelEl.innerHTML = `
+      <span class="drink-name">${escHtml(p.nom || '—')}</span>
+      <span class="price-tag">
+        ${p.prix.toFixed(2)} €
+        ${p.caution ? `<span class="caution-tag">+ ${caution.toFixed(2)} € caution</span>` : ''}
+      </span>`;
+
+    const input = document.createElement('input');
+    input.type    = 'number';
+    input.id      = `qte${i}`;
+    input.value   = '0';
+    input.min     = '0';
+    input.setAttribute('onfocus', 'clearZero(this)');
+    input.setAttribute('onblur',  'resetToZero(this)');
+
+    div.appendChild(labelEl);
+    div.appendChild(input);
+    container.appendChild(div);
+  });
+}
+
+// Liste éditable dans les paramètres
+function renderListeParametres() {
+  const container = document.getElementById('listeProduits');
+  container.innerHTML = '';
+
+  produits.forEach((p, i) => {
+    const bloc = document.createElement('div');
+    bloc.className = 'produit-config-block';
+
+    // En-tête avec badge fixe/custom et bouton supprimer
+    const header = document.createElement('div');
+    header.className = 'produit-config-header';
+    header.innerHTML = `
+      <span>${p.fixe ? '🔒' : '🧃'} ${escHtml(p.nom || 'Nouveau produit')}</span>
+      ${!p.fixe ? `<button class="btn-suppr" onclick="supprimerProduit(${i})">🗑</button>` : ''}
+    `;
+
+    // Champ nom
+    const rowNom = makeFormRow('Nom :', `
+      <input type="text" value="${escHtml(p.nom)}" maxlength="30"
+        placeholder="Nom du produit"
+        oninput="updateProduit(${i}, 'nom', this.value)">
+    `);
+
+    // Champ prix
+    const rowPrix = makeFormRow('Prix unitaire :', `
+      <input type="number" value="${p.prix.toFixed(2)}" step="0.01" min="0"
+        onfocus="clearZero(this)" onblur="resetToZero(this)"
+        oninput="updateProduit(${i}, 'prix', parseFloat(this.value)||0)">
+    `);
+
+    // Toggle caution
+    const rowCaution = makeFormRow('Caution verre :', `
+      <label class="toggle">
+        <input type="checkbox" ${p.caution ? 'checked' : ''}
+          onchange="updateProduit(${i}, 'caution', this.checked)">
+        <span class="toggle-slider"></span>
+      </label>
+    `);
+
+    bloc.appendChild(header);
+    bloc.appendChild(rowNom);
+    bloc.appendChild(rowPrix);
+    bloc.appendChild(rowCaution);
+    container.appendChild(bloc);
+  });
+}
+
+function makeFormRow(labelText, inputHtml) {
+  const div = document.createElement('div');
+  div.className = 'form-group';
+  div.innerHTML = `<label>${labelText}</label>${inputHtml}`;
+  return div;
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// ─── Mise à jour produit ──────────────────────────────────────────────────────
+function updateProduit(i, champ, valeur) {
+  produits[i][champ] = valeur;
   saveConfig();
-}
-
-// ─── Produits supplémentaires (lignes calculateur) ────────────────────────────
-function majProduitsSupplementaires() {
-  const cautionGlobale = parseFloat(document.getElementById('caution').value) || 0;
-  let nbActifs = 0;
-
-  for (let i = 0; i < 3; i++) {
-    const p     = getDataProduit(i);
-    const group = document.getElementById(`produitGroup${i}`);
-
-    if (p.nom.trim() !== '') {
-      nbActifs++;
-      document.getElementById(`nomProduit${i}Label`).textContent  = p.nom;
-      document.getElementById(`prixProduit${i}Label`).textContent = p.prix.toFixed(2);
-
-      const tag = document.getElementById(`cautionProduit${i}Tag`);
-      if (p.caution) {
-        tag.textContent   = `+ ${cautionGlobale.toFixed(2)} € caution`;
-        tag.style.display = 'inline';
-      } else {
-        tag.textContent   = '';
-        tag.style.display = 'none';
-      }
-      group.style.display = 'flex';
-    } else {
-      group.style.display = 'none';
-      document.getElementById(`nombreProduit${i}`).value = '0';
-    }
+  // Rafraîchir uniquement les lignes calculateur et le header du bloc param
+  renderLignesProduits();
+  updateBadge();
+  updateCautionBubble();
+  // Mettre à jour juste le titre du bloc sans re-render toute la liste
+  const headers = document.querySelectorAll('.produit-config-header span:first-child');
+  if (headers[i]) {
+    headers[i].textContent = `${produits[i].fixe ? '🔒' : '🧃'} ${produits[i].nom || 'Nouveau produit'}`;
   }
-
-  // Badge bouton sous-menu
-  const badge = document.getElementById('produitsBadge');
-  badge.textContent   = nbActifs > 0 ? nbActifs : '';
-  badge.style.display = nbActifs > 0 ? 'inline-flex' : 'none';
 }
 
-// ─── Sous-menu produits ───────────────────────────────────────────────────────
+// ─── Ajouter / Supprimer produit ──────────────────────────────────────────────
+function ajouterProduit() {
+  produits.push({ nom: '', prix: 0.00, caution: false, fixe: false });
+  saveConfig();
+  renderAll();
+  // Scroller vers le nouveau bloc
+  setTimeout(() => {
+    const blocs = document.querySelectorAll('.produit-config-block');
+    if (blocs.length) blocs[blocs.length - 1].scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 50);
+}
+
+function supprimerProduit(i) {
+  produits.splice(i, 1);
+  saveConfig();
+  renderAll();
+}
+
+// ─── Caution ─────────────────────────────────────────────────────────────────
+function onCautionChange() {
+  saveConfig();
+  renderLignesProduits();
+  updateCautionBubble();
+}
+
+function updateCautionBubble() {
+  document.getElementById('cautionBubble').textContent = `Caution : ${getCaution().toFixed(2)} €`;
+}
+
+function updateBadge() {
+  const extras = produits.filter(p => !p.fixe).length;
+  const badge  = document.getElementById('produitsBadge');
+  if (extras > 0) {
+    badge.textContent   = extras;
+    badge.style.display = 'inline-flex';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+// ─── Toggle paramètres / sous-menu ───────────────────────────────────────────
+function toggleParametres() {
+  const params = document.getElementById('parametres');
+  const open   = params.style.display === 'block';
+  params.style.display = open ? 'none' : 'block';
+  if (open) closeSousMenu();
+}
+
 function toggleSousMenuProduits() {
   const panel = document.getElementById('sousMenuProduits');
   const arrow = document.getElementById('produitsArrow');
@@ -176,85 +254,27 @@ function toggleSousMenuProduits() {
   arrow.textContent   = open ? '▼' : '▲';
 }
 
-// ─── Navigation produits ──────────────────────────────────────────────────────
-function navProduit(delta) {
-  sauvegarderFormulaireActif();
-  produitActif = (produitActif + delta + 3) % 3;
-  afficherFormulaireProductActif();
-}
-
-function allerProduit(index) {
-  sauvegarderFormulaireActif();
-  produitActif = index;
-  afficherFormulaireProductActif();
-}
-
-function afficherFormulaireProductActif() {
-  const p = getDataProduit(produitActif);
-
-  document.getElementById('nomProduitActif').value       = p.nom ?? '';
-  document.getElementById('prixProduitActif').value      = p.prix > 0 ? p.prix : '0.00';
-  document.getElementById('cautionProduitActif').checked = p.caution ?? false;
-  document.getElementById('produitNavLabel').textContent = `Produit ${produitActif + 1} / 3`;
-
-  for (let i = 0; i < 3; i++) {
-    const dot = document.getElementById(`dot${i}`);
-    const dp  = getDataProduit(i);
-    dot.classList.toggle('active', i === produitActif);
-    dot.classList.toggle('filled', dp.nom.trim() !== '');
-  }
-}
-
-function sauvegarderFormulaireActif() {
-  const nom     = document.getElementById('nomProduitActif').value.trim();
-  const prix    = parseFloat(document.getElementById('prixProduitActif').value) || 0;
-  const caution = document.getElementById('cautionProduitActif').checked;
-  setDataProduit(produitActif, nom, prix, caution);
-  majProduitsSupplementaires();
-  saveConfig();
-}
-
-function syncProduitActif() {
-  sauvegarderFormulaireActif();
-  afficherFormulaireProductActif();
-}
-
-// ─── Toggle paramètres ────────────────────────────────────────────────────────
-function toggleParametres() {
-  const params = document.getElementById('parametres');
-  const open   = params.style.display === 'block';
-  params.style.display = open ? 'none' : 'block';
-  if (open) {
-    document.getElementById('sousMenuProduits').style.display = 'none';
-    document.getElementById('produitsArrow').textContent      = '▼';
-  }
+function closeSousMenu() {
+  document.getElementById('sousMenuProduits').style.display = 'none';
+  document.getElementById('produitsArrow').textContent      = '▼';
 }
 
 // ─── Calcul ───────────────────────────────────────────────────────────────────
 function calculerSolde() {
   const nbGobeletsRendus = parseInt(document.getElementById('nombreGobeletsRendus').value) || 0;
-  const nbBoissons2E     = parseInt(document.getElementById('nombreBoissons2E').value)     || 0;
-  const nbBoissons4E     = parseInt(document.getElementById('nombreBoissons4E').value)     || 0;
-  const nbEauPlate       = parseInt(document.getElementById('nombreEauPlate').value)       || 0;
+  const caution          = getCaution();
 
-  const prix2   = parseFloat(document.getElementById('prix2').value)   || 0;
-  const prix4   = parseFloat(document.getElementById('prix4').value)   || 0;
-  const caution = parseFloat(document.getElementById('caution').value) || 0;
+  let totalProduits   = 0;
+  let totalCautionDue = 0;
 
-  const totalBoissons   = (nbBoissons2E * prix2) + (nbBoissons4E * prix4);
-  let totalCautionDue   = caution * (nbBoissons2E + nbBoissons4E + nbEauPlate);
-  let totalProduitsSupp = 0;
-
-  for (let i = 0; i < 3; i++) {
-    const p  = getDataProduit(i);
-    if (p.nom.trim() === '') continue;
-    const nb = parseInt(document.getElementById(`nombreProduit${i}`).value) || 0;
-    totalProduitsSupp += nb * p.prix;
+  produits.forEach((p, i) => {
+    const nb = parseInt(document.getElementById(`qte${i}`)?.value) || 0;
+    totalProduits   += nb * p.prix;
     if (p.caution) totalCautionDue += nb * caution;
-  }
+  });
 
   const cautionRendue = caution * nbGobeletsRendus;
-  const solde         = totalBoissons + totalProduitsSupp + totalCautionDue - cautionRendue;
+  const solde         = totalProduits + totalCautionDue - cautionRendue;
   soldeDu = solde;
 
   vibrate(50);
@@ -310,12 +330,11 @@ function setMontant(montant) {
 // ─── Nouveau client ───────────────────────────────────────────────────────────
 function nouveauClient() {
   vibrate(30);
-  ['nombreGobeletsRendus', 'nombreBoissons2E', 'nombreBoissons4E', 'nombreEauPlate'].forEach(id => {
-    document.getElementById(id).value = '0';
+  document.getElementById('nombreGobeletsRendus').value = '0';
+  produits.forEach((_, i) => {
+    const el = document.getElementById(`qte${i}`);
+    if (el) el.value = '0';
   });
-  for (let i = 0; i < 3; i++) {
-    document.getElementById(`nombreProduit${i}`).value = '0';
-  }
 
   const r = document.getElementById('resultat');
   r.textContent = '';
@@ -327,29 +346,16 @@ function nouveauClient() {
   soldeDu = 0;
 }
 
-// ─── Reset complet ────────────────────────────────────────────────────────────
+// ─── Réinitialiser (prix + supprime produits ajoutés) ─────────────────────────
 function resetForm() {
+  if (!confirm('Réinitialiser les prix et supprimer les produits ajoutés ?')) return;
+
   nouveauClient();
 
-  // Efface les produits, conserve les prix
-  for (let i = 0; i < 3; i++) {
-    setDataProduit(i, '', 0, false);
-  }
-
-  // Vide le formulaire visible
-  document.getElementById('nomProduitActif').value       = '';
-  document.getElementById('prixProduitActif').value      = '0.00';
-  document.getElementById('cautionProduitActif').checked = false;
-
-  // Revenir au produit 1
-  produitActif = 0;
-
-  majProduitsSupplementaires();
-  afficherFormulaireProductActif();
-
-  // Fermer le sous-menu
-  document.getElementById('sousMenuProduits').style.display = 'none';
-  document.getElementById('produitsArrow').textContent      = '▼';
+  document.getElementById('caution').value = 2.00;
+  produits = cloneProduitsDef();
 
   saveConfig();
+  renderAll();
+  closeSousMenu();
 }

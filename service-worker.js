@@ -1,4 +1,4 @@
-const CACHE_NAME = "verrifieur-v1.1.141";
+const CACHE_NAME = "verrifieur-v1.2";
 
 const URLS_TO_CACHE = [
   "/",
