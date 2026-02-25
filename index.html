@@ -20,14 +20,14 @@
   <div class="caution-bubble" id="cautionBubble">Caution : 2.00 €</div>
   <h1 class="rainbow-title">Calcul cautions</h1>
 
-  <!-- Ligne gobelets rendus (fixe) -->
+  <!-- Ligne gobelets rendus -->
   <div class="form-group">
     <label>Gobelets rendus</label>
     <input type="number" id="nombreGobeletsRendus" value="0" min="0"
       onfocus="clearZero(this)" onblur="resetToZero(this)">
   </div>
 
-  <!-- Lignes produits (générées dynamiquement) -->
+  <!-- Lignes produits dynamiques -->
   <div id="lignesProduits"></div>
 
   <div class="buttons">
@@ -58,11 +58,17 @@
   <div id="parametres">
     <h3>⚙️ Paramètres</h3>
 
-    <!-- Caution globale -->
-    <div class="form-group">
-      <label>Caution globale :</label>
-      <input type="number" id="caution" value="2.00" step="0.01" min="0"
-        onfocus="clearZero(this)" onblur="resetToZero(this)" oninput="onCautionChange()">
+    <!-- Caution globale améliorée -->
+    <div class="form-group caution-group">
+      <label>
+        <span class="caution-label-title">Caution globale</span>
+        <span class="caution-label-sub">appliquée par gobelet</span>
+      </label>
+      <div class="caution-input-wrap">
+        <input type="number" id="caution" value="2.00" step="0.50" min="0"
+          onfocus="clearZero(this)" onblur="resetToZero(this)" oninput="onCautionChange()">
+        <span class="caution-euro">€</span>
+      </div>
     </div>
 
     <!-- Bouton sous-menu produits -->
