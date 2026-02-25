@@ -16,11 +16,20 @@ let produitActif  = 0; // index 0-2 du formulaire produit affiché
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function clearZero(input) {
-  if (input.value === '0' || input.value === '0.00') input.value = '';
+  if (parseFloat(input.value) === 0 || input.value === '') {
+    input.value = '';
+  }
 }
 
 function resetToZero(input) {
-  if (input.value === '' || input.value === null) input.value = '0';
+  if (input.value === '' || input.value === null) {
+    // Si c'est un champ prix (step="0.01"), remettre 0.00
+    input.value = input.step === '0.01' ? '0.00' : '0';
+  }
+  // Si c'est un champ prix, synchroniser le produit actif
+  if (input.id === 'prixProduitActif') {
+    syncProduitActif();
+  }
 }
 
 function vibrate(pattern) {
